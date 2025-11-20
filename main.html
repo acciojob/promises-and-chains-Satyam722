@@ -1,13 +1,188 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Age Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Voting Age Checker</h1>
+        <form id="votingForm">
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" placeholder="Enter your full name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" placeholder="Enter your age" min="1" max="120" required>
+            </div>
+            
+            <button type="submit" id="btn">Check Voting Eligibility</button>
+        </form>
+        
+        <div id="loading" class="loading hidden">
+            Checking your eligibility...
+        </div>
+    </div>
 
-<html>
-  <head>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
+    <script>
+        // Get DOM elements
+        const votingForm = document.getElementById('votingForm');
+        const nameInput = document.getElementById('name');
+        const ageInput = document.getElementById('age');
+        const submitBtn = document.getElementById('btn');
+        const loadingDiv = document.getElementById('loading');
 
-  <body>
-    <!-- write the body here -->
+        // Function to check voting eligibility using Promises
+        function checkVotingEligibility(name, age) {
+            return new Promise((resolve, reject) => {
+                // Simulate server delay of 4 seconds
+                setTimeout(() => {
+                    if (age > 18) {
+                        resolve(`Welcome, ${name}. You can vote.`);
+                    } else {
+                        reject(`Oh sorry ${name}. You aren't old enough.`);
+                    }
+                }, 4000);
+            });
+        }
 
-    <script type="text/javascript" src="./script.js"></script>
-  </body>
+        // Form submission handler
+        votingForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form from actually submitting
+            
+            // Get input values
+            const name = nameInput.value.trim();
+            const age = parseInt(ageInput.value);
+            
+            // Validation: Check if inputs are empty
+            if (!name || !age) {
+                alert("Please enter valid details.");
+                return;
+            }
+            
+            // Validation: Check if age is a positive number
+            if (age <= 0) {
+                alert("Please enter a valid age.");
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            loadingDiv.classList.remove('hidden');
+            
+            // Check voting eligibility using promise
+            checkVotingEligibility(name, age)
+                .then(message => {
+                    // Promise resolved - user can vote
+                    alert(message);
+                })
+                .catch(error => {
+                    // Promise rejected - user cannot vote
+                    alert(error);
+                })
+                .finally(() => {
+                    // Reset form state regardless of success/failure
+                    submitBtn.disabled = false;
+                    loadingDiv.classList.add('hidden');
+                    votingForm.reset();
+                });
+        });
+
+        // Real-time validation
+        nameInput.addEventListener('input', validateForm);
+        ageInput.addEventListener('input', validateForm);
+
+        function validateForm() {
+            const name = nameInput.value.trim();
+            const age = ageInput.value;
+            submitBtn.disabled = !name || !age;
+        }
+
+        // Initial validation
+        validateForm();
+    </script>
+</body>
 </html>
